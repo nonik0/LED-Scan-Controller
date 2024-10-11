@@ -1,0 +1,34 @@
+void core0Task(void *pvParameters) {
+  pinMode(EXT_DISPLAY_PIN, OUTPUT);
+  pinMode(DISPLAY_PIN, OUTPUT);
+  digitalWrite(EXT_DISPLAY_PIN, display);
+  digitalWrite(DISPLAY_PIN, !display);
+  // wifiSetup();
+  // mDnsSetup();
+  // otaSetup();
+  // restSetup();
+
+  while (1) {
+    // ArduinoOTA.handle();
+    // restServer.handleClient();
+    // checkWifiStatus();
+
+    // digitalWrite(EXT_DISPLAY_PIN, display);
+    // digitalWrite(DISPLAY_PIN, !display);
+
+    // delay(50);
+  }
+}
+
+void core1Task(void *pvParameters) {
+  pinMode(LATCH_PIN, OUTPUT);
+  digitalWrite(LATCH_PIN, LOW);
+  SPI.begin();
+
+  // refreshTimer = timerBegin(1000000);
+  // timerAttachInterrupt(refreshTimer, &refreshTimerCallback);
+  // timerAlarm(refreshTimer, REFRESH_RATE_US, true, 0);
+  // log_d("Started refresh timer");
+
+  //vTaskDelete(NULL);
+}
