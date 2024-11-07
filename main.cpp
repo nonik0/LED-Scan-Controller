@@ -29,7 +29,7 @@ volatile uint16_t displayBuffer[NUM_ROWS] = {
     (uint16_t)0b0000000000000000,
     (uint16_t)0b0000000110000000,
     (uint16_t)0b0000001111000000,
-    (uint16_t)0b0000001111000000, 
+    (uint16_t)0b0000001111000000,
     (uint16_t)0b0111111111111110,
     (uint16_t)0b0011110110111100,
     (uint16_t)0b0001110110111000,
@@ -45,6 +45,7 @@ volatile uint16_t displayBuffer[NUM_ROWS] = {
 };
 
 uint16_t limiter = 0;
+volatile int scrollIndex = 0;
 volatile int curLine = 0;
 volatile int blankCycles = 0; // between each line cycle
 
@@ -56,6 +57,10 @@ ISR(TIMER2_COMPA_vect)
 
   uint16_t rowData = (blankCycles > 0 || !display) ? 0xFFFF : ~displayBuffer[curLine];
   uint16_t rowSelect = (blankCycles > 0 || !display) ? 0xFFFF : ~(0x01 << curLine);
+
+  // shift rowData by scrollIndex bits, wrapping bits around
+  rowData = (rowData << scrollIndex) | (rowData >> (NUM_COLS - scrollIndex));
+
   SPI.transfer16(rowData);
   SPI.transfer16(rowSelect);
   digitalWrite(LATCH_PIN, LOW);
@@ -117,10 +122,10 @@ void setup()
   Serial.println("Finished setup");
 }
 
-int start = 0;
+int colorIndex = 0;
+int colorDelay = 2;
 void loop()
 {
-  Serial.println(start++);
   rgbLeds.clear();
 
   display = digitalRead(EXT_DISPLAY_PIN);
@@ -130,13 +135,18 @@ void loop()
   {
     for (int i = 0; i < RGB_LED_COUNT; i++)
     {
-      rgbLeds.setPixelColor(i, Colors[(i + start) % 3]);
+      rgbLeds.setPixelColor(i, Colors[(i + colorIndex) % 3]);
     }
   }
   rgbLeds.show();
 
-  start++;
-  delay(400);
+  scrollIndex = (scrollIndex + 1) % NUM_COLS;
+  if (--colorDelay <= 0)
+  {
+    colorDelay = 2;
+    colorIndex = (colorIndex + 1) % 3;
+  }
+  delay(100);
   // scan animation test
 
   // // row scan
